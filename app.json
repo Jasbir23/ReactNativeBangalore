@@ -1,0 +1,18 @@
+{
+   "expo": {
+    "name": "RNBlr",
+    "version": "1.0.0",
+    "sdkVersion": "20.0.0",
+    "android": {
+      "package": "com.geekyants.RNBlr",
+    },
+    "ios": {
+      "bundleIdentifier": "com.geekyants.RNBlr",
+    },
+    "androidStatusBarColor": "rgb(60, 67, 79)",
+		"androidStatusBar": {
+			"barStyle": "light-content",
+			"backgroundColor": "rgb(60, 67, 79)"
+		}
+   }
+ }
