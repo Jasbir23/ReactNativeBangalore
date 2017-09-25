@@ -6,6 +6,7 @@
     "icon": "./src/assets/rnblrIcon.png",
     "loading": {
       "hideExponentText": true,
+      "icon": "./src/assets/loading.png",
       "backgroundImage": "./src/assets/rnblrSplash.png"
     },
     "android": {
