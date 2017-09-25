@@ -1,18 +1,22 @@
 {
-   "expo": {
+  "expo": {
     "name": "RNBlr",
     "version": "1.0.0",
     "sdkVersion": "20.0.0",
+    "icon": "./src/assets/rnblrIcon.png",
+    "loading": {
+      "hideExponentText": true,
+      "backgroundImage": "./src/assets/rnblrSplash.png"
+    },
     "android": {
-      "package": "com.geekyants.RNBlr",
+      "package": "com.geekyants.RNBlr"
     },
     "ios": {
-      "bundleIdentifier": "com.geekyants.RNBlr",
+      "bundleIdentifier": "com.geekyants.RNBlr"
     },
-    "androidStatusBarColor": "rgb(60, 67, 79)",
-		"androidStatusBar": {
-			"barStyle": "light-content",
-			"backgroundColor": "rgb(60, 67, 79)"
-		}
-   }
- }
+    "androidStatusBar": {
+      "barStyle": "light-content"
+    },
+    "facebookScheme": "fb1629052627160543"
+  }
+}

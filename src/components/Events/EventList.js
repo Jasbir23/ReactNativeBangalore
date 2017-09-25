@@ -43,7 +43,18 @@ export default class EventList extends Component {
       outputRange: [1, 1.2, 1, 1.1, 1]
     });
     if (MainStore.allEvents === undefined) {
-      return <Spinner />;
+      return (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgb(60,67,79)",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Spinner color="white" />
+        </View>
+      );
     }
     return (
       <View style={{ flex: 1 }}>
@@ -137,7 +148,6 @@ export default class EventList extends Component {
     );
   }
   requested(eve) {
-    console.log("requested", eve);
     firebase
       .database()
       .ref("Users/" + MainStore.currentUserId + "/eventRequest/" + eve.id)
@@ -419,8 +429,7 @@ export default class EventList extends Component {
   }
   renderCard(index) {
     const obj = Object.keys(MainStore.allEvents);
-    const eve = MainStore.allEvents[obj[index]];
-    // console.log(eve);
+    const eve = MainStore.allEvents[obj[obj.length - index - 1]];
     return (
       <View
         style={{

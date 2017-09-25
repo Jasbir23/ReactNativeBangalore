@@ -36,7 +36,6 @@ export default class ProfileScreen extends Component {
       hasChanged: false,
       submitted: false
     };
-    console.log(width, "090989087908");
   }
   submitted() {
     this.setState({
@@ -75,12 +74,14 @@ export default class ProfileScreen extends Component {
         });
     }
     if (this.form.bio !== "" && this.form.bio !== undefined) {
-      firebase.database().ref("Users/" + MainStore.currentUserId + "/bio").set({
-        val: this.form.bio
-      });
+      firebase
+        .database()
+        .ref("Users/" + MainStore.currentUserId + "/bio")
+        .set({
+          val: this.form.bio
+        });
     }
     if (this.form.city !== "" && this.form.city !== undefined) {
-      console.log(this.form.city, "3443434343");
       firebase
         .database()
         .ref("Users/" + MainStore.currentUserId + "/city")
@@ -88,13 +89,15 @@ export default class ProfileScreen extends Component {
           val: this.form.city
         });
     }
-    firebase.database().ref("Users/").once("value", snapshot => {
-      MainStore.setAllUsers(snapshot.val());
-      this.props.navigation.goBack();
-    });
+    firebase
+      .database()
+      .ref("Users/")
+      .once("value", snapshot => {
+        MainStore.setAllUsers(snapshot.val());
+        this.props.navigation.goBack();
+      });
   }
   componentWillMount() {
-    console.log(this.form.validateErrorName, "566565656");
     firebase
       .database()
       .ref("Users/" + MainStore.currentUserId + "/")
@@ -102,12 +105,22 @@ export default class ProfileScreen extends Component {
         this.setState({
           userObj: snapshot.val()
         });
-        console.log(this.state.userObj, "090909090909090909");
       });
   }
   render() {
     if (this.state.userObj === undefined) {
-      return <Spinner />;
+      return (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgb(60,67,79)",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Spinner />
+        </View>
+      );
     }
     return (
       <View
@@ -151,9 +164,10 @@ export default class ProfileScreen extends Component {
             <Thumbnail
               style={{ marginTop: 35 }}
               source={{
-                uri: this.state.userObj.picture.data.url !== undefined
-                  ? this.state.userObj.picture.data.url
-                  : "https://inayatmiah.files.wordpress.com/2015/01/fbpic.jpg"
+                uri:
+                  this.state.userObj.picture !== undefined
+                    ? this.state.userObj.picture.data.url
+                    : "https://raw.githubusercontent.com/Jasbir23/RNBangalore-Store/master/assets/propic/user.png"
               }}
             />
             <Text
@@ -182,9 +196,10 @@ export default class ProfileScreen extends Component {
                 style={{
                   fontSize: 15,
                   marginHorizontal: 5,
-                  color: this.state.errorMsg === ""
-                    ? "transparent"
-                    : "rgb(22, 251, 255)"
+                  color:
+                    this.state.errorMsg === ""
+                      ? "transparent"
+                      : "rgb(22, 251, 255)"
                 }}
               />
               <Text
@@ -215,7 +230,7 @@ export default class ProfileScreen extends Component {
               }}
               onPress={() => {
                 MainStore.setUserLoginState(undefined);
-                AsyncStorage.removeItem("@UserLogin");
+                AsyncStorage.removeItem("@rnblrappUser");
                 this.props.navigation.dispatch(
                   NavigationActions.reset({
                     index: 0,
@@ -287,7 +302,7 @@ export default class ProfileScreen extends Component {
                 rounded
                 error={
                   this.form.validateErrorName !== undefined &&
-                    this.form.name !== ""
+                  this.form.name !== ""
                 }
               >
                 <Input
@@ -353,13 +368,13 @@ export default class ProfileScreen extends Component {
                 rounded
                 error={
                   this.form.validateErrorProfession !== undefined &&
-                    this.form.profession !== ""
+                  this.form.profession !== ""
                 }
               >
                 <Input
                   placeholder={
                     this.state.userObj.profession === undefined ||
-                      this.state.userObj.profession === 0
+                    this.state.userObj.profession === 0
                       ? "***"
                       : this.state.userObj.profession.val
                   }
@@ -420,17 +435,17 @@ export default class ProfileScreen extends Component {
                 rounded
                 error={
                   this.form.validateErrorEmail !== undefined &&
-                    this.form.email !== ""
+                  this.form.email !== ""
                 }
               >
                 <Input
                   placeholder={
                     this.state.userObj.email === undefined ||
-                      this.state.userObj.email === 0
+                    this.state.userObj.email === 0
                       ? "***"
                       : this.state.userObj.email.val
-                          ? this.state.userObj.email.val
-                          : this.state.userObj.email
+                        ? this.state.userObj.email.val
+                        : this.state.userObj.email
                   }
                   style={{ transform: [{ scale: 0.85 }] }}
                   onChangeText={val => {
@@ -488,13 +503,13 @@ export default class ProfileScreen extends Component {
                 rounded
                 error={
                   this.form.validateErrorExperience !== undefined &&
-                    this.form.experience !== ""
+                  this.form.experience !== ""
                 }
               >
                 <Input
                   placeholder={
                     this.state.userObj.experience === undefined ||
-                      this.state.userObj.experience === 0
+                    this.state.userObj.experience === 0
                       ? "***"
                       : this.state.userObj.experience.val
                   }
@@ -554,13 +569,13 @@ export default class ProfileScreen extends Component {
                 rounded
                 error={
                   this.form.validateErrorBio !== undefined &&
-                    this.form.bio !== ""
+                  this.form.bio !== ""
                 }
               >
                 <Input
                   placeholder={
                     this.state.userObj.bio === undefined ||
-                      this.state.userObj.bio === 0
+                    this.state.userObj.bio === 0
                       ? "***"
                       : this.state.userObj.bio.val
                   }
@@ -620,13 +635,13 @@ export default class ProfileScreen extends Component {
                 rounded
                 error={
                   this.form.validateErrorCity !== undefined &&
-                    this.form.city !== ""
+                  this.form.city !== ""
                 }
               >
                 <Input
                   placeholder={
                     this.state.userObj.city === undefined ||
-                      this.state.userObj.city === 0
+                    this.state.userObj.city === 0
                       ? "***"
                       : this.state.userObj.city.val
                   }
@@ -671,8 +686,8 @@ export default class ProfileScreen extends Component {
               onPress={() => this.submitted()}
               disabled={
                 this.state.errorMsg !== "" ||
-                  !this.state.hasChanged ||
-                  this.state.submitted
+                !this.state.hasChanged ||
+                this.state.submitted
               }
               rounded
               primary={this.state.errorMsg === "" && this.state.hasChanged}
@@ -686,94 +701,3 @@ export default class ProfileScreen extends Component {
     );
   }
 }
-
-// <TouchableOpacity
-//   style={{
-//     position: "absolute",
-//     width: 50,
-//     height: 50,
-//     top: 24,
-//     left: 8,
-//     padding: 8
-//   }}
-//   onPress={() => this.props.navigation.goBack()}
-// >
-//   <Icon name="arrow-back" style={{ color: "white" }} />
-// </TouchableOpacity>
-// <View
-//   style={{
-//     flex: 1,
-//     width: 200,
-//     flexDirection: "column",
-//     alignItems: "center",
-//     justifyContent: "center"
-//   }}
-// >
-//   <Thumbnail
-//     source={{
-//       uri: this.state.userObj.picture.data.url !== undefined
-//         ? this.state.userObj.picture.data.url
-//         : "https://inayatmiah.files.wordpress.com/2015/01/fbpic.jpg"
-//     }}
-//   />
-//   <Text
-//     style={{
-//       marginTop: 10,
-//       color: "white",
-//       fontSize: 20,
-//       fontWeight: "bold"
-//     }}
-//   >
-//     {this.state.userObj.name}
-//   </Text>
-//   <Text
-//     style={{
-//       marginTop: 10,
-//       fontSize: 12,
-//       color: "white"
-//     }}
-//   >
-//     {this.state.userObj.email !== 0 ||
-//       this.state.userObj.email !== undefined
-//       ? this.state.userObj.email
-//       : ""}
-//   </Text>
-//
-//   <TouchableOpacity
-//     style={{
-//       position: "absolute",
-//       width: 60,
-//       height: 50,
-//       top: 24,
-//       left: width - 150,
-//       flexDirection: "column",
-//       padding: 8,
-//       justifyContent: "center",
-//       alignItems: "center"
-//     }}
-//     onPress={() => {
-//       MainStore.setUserLoginState(undefined);
-//       AsyncStorage.removeItem("@UserLogin");
-//       this.props.navigation.dispatch(
-//         NavigationActions.reset({
-//           index: 0,
-//           actions: [
-//             NavigationActions.navigate({
-//               routeName: "LoginComponent"
-//             })
-//           ]
-//         })
-//       );
-//     }}
-//   >
-//     <Icon
-//       active
-//       name="power"
-//       style={{ color: "white", fontWeight: "bold", fontSize: 25 }}
-//     />
-//     <Text
-//       style={{ fontSize: 12, color: "white", fontWeight: "bold" }}
-//     >
-//       logout
-//     </Text>
-//   </TouchableOpacity>

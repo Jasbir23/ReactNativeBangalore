@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { AsyncStorage, Alert } from "react-native";
+import { AsyncStorage } from "react-native";
 import Exponent from "expo";
 import { NavigationActions } from "react-navigation";
 import { observer } from "mobx-react/native";
@@ -7,6 +7,7 @@ import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { Spinner, Icon } from "native-base";
 import * as firebase from "firebase";
 import MainStore from "../../Store/MainStore";
+import { Permissions, Notifications } from "expo";
 
 @observer
 export default class LoginComponent extends Component {
@@ -21,16 +22,34 @@ export default class LoginComponent extends Component {
       looper: new Animated.Value(0)
     };
   }
+  async getNotificationsPermission() {
+    const { existingStatus } = await Permissions.getAsync(
+      Permissions.NOTIFICATIONS
+    );
+    let finalStatus = existingStatus;
+    if (existingStatus !== "granted") {
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      finalStatus = status;
+    }
+    if (finalStatus !== "granted") {
+      return;
+    }
+    let token = await Notifications.getExpoPushTokenAsync();
+    firebase
+      .database()
+      .ref("Users/" + MainStore.currentUserId + "/notificationKey/")
+      .set({
+        value: token
+      });
+  }
   async componentDidMount() {
     this.animationLoop();
-    if ((await MainStore.userLoginState) === undefined) {
-      console.log("no previous login");
-    }
     if ((await MainStore.userLoginState) !== undefined) {
       MainStore.setCurrentUserId(MainStore.userLoginState.id);
       this.setState({
         isFetching: false
       });
+      this.getNotificationsPermission();
       this.props.navigation.dispatch(
         NavigationActions.reset({
           index: 0,
@@ -45,11 +64,8 @@ export default class LoginComponent extends Component {
       id: this.state.loginResponse.id
     };
     try {
-      await AsyncStorage.setItem("@UserLogin", JSON.stringify(obj));
-    } catch (error) {
-      // Error saving data
-      console.log(error);
-    }
+      await AsyncStorage.setItem("@rnblrappUser", JSON.stringify(obj));
+    } catch (error) {}
   }
 
   async logIn() {
@@ -60,7 +76,7 @@ export default class LoginComponent extends Component {
       type,
       token
     } = await Exponent.Facebook.logInWithReadPermissionsAsync(
-      "742168645991093",
+      "1629052627160543",
       {
         permissions: ["public_profile", "email"]
       }
@@ -80,16 +96,17 @@ export default class LoginComponent extends Component {
       this.setState({
         loginResponse: obj
       });
-      console.log(this.state.loginResponse, "gjyghj");
+      console.log(this.state.loginResponse);
       Object.keys(MainStore.allUsers).map((item, index) => {
         if (item === this.state.loginResponse.id) {
-          console.log("user exists");
           found = true;
           MainStore.setCurrentUserId(item);
           this.saveUser();
           this.setState({
             isFetching: false
           });
+          console.log("Existing Login");
+          this.getNotificationsPermission();
           this.props.navigation.dispatch(
             NavigationActions.reset({
               index: 0,
@@ -99,46 +116,54 @@ export default class LoginComponent extends Component {
         }
       });
       if (found === false) {
-        console.log(
-          "New User",
-          this.state.loginResponse,
-          this.state.loginResponse.cover
-        );
-        firebase.database().ref("Users/" + this.state.loginResponse.id).set({
-          name: this.state.loginResponse.name === undefined
-            ? 0
-            : this.state.loginResponse.name,
-          id: this.state.loginResponse.id === undefined
-            ? 0
-            : this.state.loginResponse.id,
-          age_range: this.state.loginResponse.age_range === undefined
-            ? 0
-            : this.state.loginResponse.age_range,
-          link: this.state.loginResponse.link === undefined
-            ? 0
-            : this.state.loginResponse.link,
-          gender: this.state.loginResponse.gender === undefined
-            ? 0
-            : this.state.loginResponse.gender,
-          picture: this.state.loginResponse.picture === undefined
-            ? 0
-            : this.state.loginResponse.picture,
-          cover: this.state.loginResponse.cover === undefined
-            ? 0
-            : this.state.loginResponse.cover,
-          first_name: this.state.loginResponse.first_name === undefined
-            ? 0
-            : this.state.loginResponse.first_name,
-          email: this.state.loginResponse.email === undefined
-            ? 0
-            : this.state.loginResponse.email
-        });
-        console.log("New User");
+        console.log("New Login");
+        firebase
+          .database()
+          .ref("Users/" + this.state.loginResponse.id)
+          .set({
+            name:
+              this.state.loginResponse.name === undefined
+                ? 0
+                : this.state.loginResponse.name,
+            id:
+              this.state.loginResponse.id === undefined
+                ? 0
+                : this.state.loginResponse.id,
+            age_range:
+              this.state.loginResponse.age_range === undefined
+                ? 0
+                : this.state.loginResponse.age_range,
+            link:
+              this.state.loginResponse.link === undefined
+                ? 0
+                : this.state.loginResponse.link,
+            gender:
+              this.state.loginResponse.gender === undefined
+                ? 0
+                : this.state.loginResponse.gender,
+            picture:
+              this.state.loginResponse.picture === undefined
+                ? 0
+                : this.state.loginResponse.picture,
+            cover:
+              this.state.loginResponse.cover === undefined
+                ? 0
+                : this.state.loginResponse.cover,
+            first_name:
+              this.state.loginResponse.first_name === undefined
+                ? 0
+                : this.state.loginResponse.first_name,
+            email:
+              this.state.loginResponse.email === undefined
+                ? 0
+                : this.state.loginResponse.email
+          });
         MainStore.setCurrentUserId(this.state.loginResponse.id);
         this.saveUser();
         this.setState({
           isFetching: false
         });
+        this.getNotificationsPermission();
         this.props.navigation.dispatch(
           NavigationActions.reset({
             index: 0,
@@ -176,11 +201,22 @@ export default class LoginComponent extends Component {
       MainStore.allEvents === undefined ||
       this.state.isFetching
     ) {
-      return <Spinner />;
+      return (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgb(60, 67, 79)",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Spinner color="white" />
+        </View>
+      );
     }
     return (
       <View style={{ flex: 1, backgroundColor: "rgb(60, 67, 79)" }}>
-        <View style={{ flex: 2, paddingTop: 60 }}>
+        <View style={{ flex: 2, paddingTop: 60, paddingHorizontal: 20 }}>
           <Text
             style={{
               fontSize: 25,

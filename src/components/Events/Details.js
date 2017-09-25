@@ -2,14 +2,15 @@ import React, { Component } from "react";
 import {
   View,
   Image,
-  WebView,
   Dimensions,
   Animated,
   TouchableOpacity,
   TextInput,
   ScrollView,
   StatusBar,
-  Platform
+  Platform,
+  Linking,
+  Alert
 } from "react-native";
 import { Video } from "expo";
 import {
@@ -206,11 +207,11 @@ export default class Details extends Component {
                 >
                   <Thumbnail
                     source={{
-                      uri: MainStore.allUsers[
-                        MainStore.allEvents[MainStore.currentEventId].comments[
-                          index
-                        ].user
-                      ].picture.data.url
+                      uri:
+                        MainStore.allUsers[
+                          MainStore.allEvents[MainStore.currentEventId]
+                            .comments[index].user
+                        ].picture.data.url
                     }}
                   />
                 </View>
@@ -276,17 +277,43 @@ export default class Details extends Component {
   }
 
   renderText(txt, index) {
-    return (
-      <View
-        key={index}
-        style={{
-          padding: 10,
-          marginVertical: 10
-        }}
-      >
-        <Text>{txt.value}</Text>
-      </View>
-    );
+    if (txt.isHeader === true) {
+      return (
+        <View
+          key={index}
+          style={{
+            padding: 10,
+            marginVertical: 5,
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            paddingLeft: 15
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 25,
+              fontWeight: "bold",
+              color: "rgb(60, 67, 79)"
+            }}
+          >
+            {txt.value}
+          </Text>
+        </View>
+      );
+    } else {
+      return (
+        <View
+          key={index}
+          style={{
+            padding: 10,
+            paddingHorizontal: 20,
+            marginVertical: 10
+          }}
+        >
+          <Text>{txt.value}</Text>
+        </View>
+      );
+    }
   }
   renderImage(image, index) {
     return (
@@ -294,11 +321,12 @@ export default class Details extends Component {
         key={index}
         style={{
           height: width * image.hfactor + 20,
-          width: image.iscover ? width : width - 30,
-          marginHorizontal: image.iscover ? 0 : 15,
+          width: image.isCover ? width : width - 30,
+          marginHorizontal: image.isCover ? 0 : 15,
           marginVertical: 10,
           justifyContent: "center",
-          alignItems: "center"
+          alignItems: "center",
+          marginTop: 25
         }}
       >
         <Spinner
@@ -314,11 +342,11 @@ export default class Details extends Component {
           }}
           style={{
             height: width * image.hfactor,
-            width: image.iscover ? width : width - 30,
+            width: image.isCover ? width : width - 30,
             top: 0,
-            borderWidth: image.iscover ? 0 : 1,
+            borderWidth: image.isCover ? 0 : 1,
             borderColor: "rgb(60, 67, 79)",
-            borderRadius: 4
+            borderRadius: image.isCover ? 0 : 4
           }}
         />
         <View
@@ -341,44 +369,57 @@ export default class Details extends Component {
         key={index}
         style={{
           marginVertical: 10,
-          height: 160,
+          height: 190,
           width: 300,
           alignSelf: "center",
           marginHorizontal: 15
         }}
       >
-        <Image
-          style={{ height: 140, width: 300, borderRadius: 10 }}
-          source={{
-            uri: "https://i0.wp.com/digital-photography-school.com/wp-content/uploads/flickr/5661878892_15fba42846_o.jpg?resize=610&ssl=1"
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              height: 140,
-              width: 300,
-              backgroundColor: "rgba(0,0,0,0.3)",
-              borderRadius: 10,
-              justifyContent: "center",
-              alignItems: "center"
+        <View style={{ borderRadius: 10 }}>
+          <Image
+            style={{ height: 160, width: 300, borderRadius: 10 }}
+            source={{
+              uri: video.coverPic
             }}
           >
-            <Icon
-              name="logo-youtube"
-              style={{ fontSize: 30, fontWeight: "bold", color: "white" }}
-            />
-          </TouchableOpacity>
-        </Image>
+            <TouchableOpacity
+              style={{
+                height: 160,
+                width: 300,
+                backgroundColor: "rgba(0,0,0,0.1)",
+                borderRadius: 10,
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+              onPress={() =>
+                Linking.openURL(video.value).catch(err => {
+                  Alert.alert(
+                    "Oops",
+                    "there seems to be a problem with this links, try again later"
+                  );
+                })}
+            >
+              <Icon
+                name="logo-youtube"
+                style={{
+                  fontSize: 40,
+                  fontWeight: "bold",
+                  color: "white"
+                }}
+              />
+            </TouchableOpacity>
+          </Image>
+        </View>
         <View
           style={{
-            height: 20,
+            height: 30,
             width: 300,
             justifyContent: "center",
             alignItems: "center",
-            paddingTop: 20
+            paddingTop: 10
           }}
         >
-          <Text style={{ fontSize: 12, color: "grey" }}>{video.tag}</Text>
+          <Text style={{ fontSize: 15, color: "grey" }}>{video.tag}</Text>
         </View>
       </View>
     );
@@ -398,7 +439,18 @@ export default class Details extends Component {
       outputRange: [1, 1.4, 1, 1.2, 1]
     });
     if (MainStore.allEvents[MainStore.currentEventId] === undefined) {
-      return <Spinner />;
+      return (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgb(60, 67, 79)"
+          }}
+        >
+          <Spinner color="white" />
+        </View>
+      );
     }
     return (
       <Container>
@@ -428,7 +480,8 @@ export default class Details extends Component {
             </Button>
           </Right>
         </Header>
-        <Content ref="scrollRef" style={{ paddingBottom: 40 }}>
+        <Content ref="scrollRef" contentContainerStyle={{ paddingBottom: 20 }}>
+          <StatusBar barStyle="light-content" />
           <View
             style={{
               height: 100,
@@ -513,7 +566,8 @@ export default class Details extends Component {
                 flexDirection: "row",
                 justifyContent: "flex-start",
                 alignItems: "center",
-                marginVertical: 7
+                marginVertical: 7,
+                marginBottom: 20
               }}
             >
               <Icon
@@ -533,9 +587,11 @@ export default class Details extends Component {
                   letterSpacing: 1
                 }}
               >
-                {Object.keys(
-                  MainStore.allEvents[MainStore.currentEventId].likes
-                ).length + " Likes"}
+                {MainStore.allEvents[MainStore.currentEventId].likes
+                  ? Object.keys(
+                      MainStore.allEvents[MainStore.currentEventId].likes
+                    ).length + " Likes"
+                  : "0" + " Likes"}
               </Text>
             </View>
           </View>
@@ -595,7 +651,6 @@ export default class Details extends Component {
             transform: [{ translateX: movCom }]
           }}
         >
-
           <View style={{ flex: 1 }}>
             <TouchableOpacity
               onPress={() => this.commentPressed()}
